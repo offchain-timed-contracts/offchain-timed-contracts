@@ -1,0 +1,30 @@
+{
+  "name": "offchain-timed-contracts",
+  "version": "0.0.1",
+  "description": "Offchain timed contracts for Ethereum",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/offchain-timed-contracts/offchain-timed-contracts.git"
+  },
+  "keywords": [
+    "ethereum",
+    "vdf",
+    "PoR",
+    "snarks"
+  ],
+  "author": "Built by the Offchain Timed Contracts team at IC3-Ethereum Bootcamp",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/offchain-timed-contracts/offchain-timed-contracts/issues"
+  },
+  "homepage": "https://github.com/offchain-timed-contracts/offchain-timed-contracts#readme",
+  "dependencies": {
+    "circom": "0.0.28",
+    "circomlib": "0.0.8",
+    "snarkjs": "^0.1.13"
+  }
+}
