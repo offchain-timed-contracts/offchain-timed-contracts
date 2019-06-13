@@ -1,8 +1,6 @@
 include "../node_modules/circomlib/circuits/eddsamimc.circom";
 include "../node_modules/circomlib/circuits/mimc.circom";
 
-include "./mimc.circom";
-
 template GetMerkleRoot(k){
     // k is depth of tree
 
@@ -54,8 +52,34 @@ template LeafExistence(k){
 
 }
 
-template Main(k) {
+// k is the depth of tree
+// t is the number of times to check
+template Main(k, t) {
+   // Merkle root of por tree
+   signal input por_root;
 
+   // PoRs to check
+   signal input por_leaves[t];
+
+   // Merkle proof for por in por tree
+   signal private input paths2por_root[2**k,k];
+
+   // binary vector to indicate whether node is left or right
+   signal private input paths2por_root_pos[2**k,k];
+   
+   // Use this to make sure that inputted merkle root is correct
+   component porExistence[t];
+
+   for (var i = 0; i < t; i++) {
+      porExistence[i] = LeafExistence(k);
+      porExistence[i].leaf <== por_leaves[i];
+      porExistence[i].root <== por_root;
+      
+      for (var j = 0; j < k; j++) {
+         porExistence[i].paths2_root_pos[j] <== paths2por_root_pos[i, j];
+         porExistence[i].paths2_root[j] <== paths2por_root[i, j];
+      }
+   }
 }
 
-component main = Main(2);
+component main = Main(2,2);
