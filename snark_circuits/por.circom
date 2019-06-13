@@ -1,4 +1,4 @@
-include "./circomlib/circuits/mimc.circom";
+include "./mimc.circom";
 
 template GetMerkleRoot(k){
     // k is depth of tree

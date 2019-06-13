@@ -1,3 +1,5 @@
+// merkleproof.js generates a merkle tree of some values, and output a proof of
+// a given value to the "input.json" file that can be given to a snarkjs proof.
 const {mimc7} = require('circomlib')
 const snarkjs = require('snarkjs')
 const {bigInt} = require('snarkjs')
