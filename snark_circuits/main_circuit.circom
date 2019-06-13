@@ -1,3 +1,6 @@
+include "../node_modules/circomlib/circuits/eddsamimc.circom";
+include "../node_modules/circomlib/circuits/mimc.circom";
+
 include "./mimc.circom";
 
 template GetMerkleRoot(k){
@@ -51,4 +54,8 @@ template LeafExistence(k){
 
 }
 
-component main = LeafExistence(2);
+template Main(k) {
+
+}
+
+component main = Main(2);
