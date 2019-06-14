@@ -25,16 +25,17 @@ template GetMerkleRoot(k){
         merkle_root[v].k <== 0;
     }
 
-    // equality constraint: input tx root === computed tx root 
+    // equality constraint: input tx root === computed tx root
     out <== merkle_root[k-1].out;
 
 }
+
 
 // checks for existence of leaf in tree of depth k
 template LeafExistence(k){
     // k is depth of tree
 
-    signal input leaf; 
+    signal input leaf;
     signal input root;
     signal input paths2_root_pos[k];
     signal input paths2_root[k];
@@ -47,7 +48,7 @@ template LeafExistence(k){
         computed_root.paths2_root_pos[w] <== paths2_root_pos[w];
     }
 
-    // equality constraint: input tx root === computed tx root 
+    // equality constraint: input tx root === computed tx root
     root === computed_root.out;
 
 }
@@ -66,7 +67,7 @@ template Main(k, t) {
 
    // binary vector to indicate whether node is left or right
    signal private input paths2por_root_pos[2**k,k];
-   
+
    // Use this to make sure that inputted merkle root is correct
    component porExistence[t];
 
@@ -74,7 +75,7 @@ template Main(k, t) {
       porExistence[i] = LeafExistence(k);
       porExistence[i].leaf <== por_leaves[i];
       porExistence[i].root <== por_root;
-      
+
       for (var j = 0; j < k; j++) {
          porExistence[i].paths2_root_pos[j] <== paths2por_root_pos[i, j];
          porExistence[i].paths2_root[j] <== paths2por_root[i, j];
