@@ -43,6 +43,6 @@ function writeProof (proofs) {
 }
 
 const data = [...Array(4)].map((_, i) => bigInt(i))
-const proof = post(data, 2, bigInt(5), 0)
+const proof = post(data, 3, bigInt(1), 0)
 console.log(proof)
 writeProof(proof)
