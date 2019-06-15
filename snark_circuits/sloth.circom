@@ -10,13 +10,10 @@ template sloth (iter) {
   signal c4[iter];
 
   for (var i = 0; i < iter; i++) {
-
     c2[i] <== c[i] * c[i];
     c4[i] <==  c2[i] * c2[i];
-    c[i+1] <==  c4[i] * c[i] - k ; 
+    c[i+1] <==  c4[i] * c[i] - k ;
   }
 
   x === c[iter];
 }
-
-component main = sloth(2)
