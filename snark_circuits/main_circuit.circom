@@ -32,37 +32,40 @@ template Main (d, t) {
   // Merkle root of por tree
   signal input por_root;
 
+  // Key for Sloth VDF
+  signal input k;
+
+  // first challenge
+  signal input por_seed_pos[d];
+
   // PoRs to check
-  signal input por_leaves[t];
+  signal private input por_leaves[t];
 
   // Merkle proof for por in por tree
   signal private input paths2por_root[t][d];
 
   // binary vector to indicate whether node is left or right
-  signal private input paths2por_root_pos[t][d];
+  signal private input paths2por_root_pos[t-1][d];
 
   // Private inputs for Sloth VDF
-  signal private input in[t];
-
-  // Key for Sloth VDF
-  signal input k;
+  signal private input in[t-1];
 
   // Use this to make sure that inputted merkle root is correct
   component porMerkleRoot = GetMerkleRoot(d,t);
-
   porMerkleRoot.root <-- por_root;
   for (var i = 0; i < t; i++) {
     porMerkleRoot.leaf[i] <-- por_leaves[i];
 
+
     for (var j = 0; j < d; j++) {
-      porMerkleRoot.paths2_root_pos[i][j] <-- paths2por_root_pos[i][j];
+      porMerkleRoot.paths2_root_pos[i][j] <-- i == 0 ? por_seed_pos[i] : paths2por_root_pos[i-1][j];
       porMerkleRoot.paths2_root[i][j] <-- paths2por_root[i][j];
     }
  }
 
   // Verify aggregated VDF
-  component slothVerification[t];
-  component bin[t];
+  component slothVerification[t-1];
+  component bin[t-1];
   for (var i = 0; i < t-1; i++) {
     slothVerification[i] = sloth(2);
     slothVerification[i].in <== in[i];
