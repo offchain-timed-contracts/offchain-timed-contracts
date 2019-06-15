@@ -67,7 +67,7 @@ template Main (d, t) {
   component slothVerification[t-1];
   component bin[t-1];
   for (var i = 0; i < t-1; i++) {
-    slothVerification[i] = sloth(2);
+    slothVerification[i] = sloth(10);
     slothVerification[i].in <-- in[i];
     slothVerification[i].x <-- porMerkleRoot.leaf[i] ;
     slothVerification[i].k <-- k;
@@ -81,4 +81,4 @@ template Main (d, t) {
   }
 }
 
-component main = Main(2, 3);
+component main = Main(2, 2);
