@@ -3,7 +3,7 @@ const snarkjs = require('snarkjs')
 const {bigInt} = require('snarkjs')
 var hash = mimc7.multiHash
 
-function generateMerkleTree (values) {
+exports.generateMerkleTree = (values) => {
   var depth = Math.log2(values.length)
 
   const layers = [...Array(depth)].reduce((acc, _, i) => {
@@ -28,7 +28,7 @@ function debugMerkleTree (layers) {
   })
 }
 
-function merkleProof (layers, index) {
+exports.merkleProof = (layers, index) => {
   const depth = layers.length - 1
   const pos = []
   const vals = []
@@ -61,15 +61,15 @@ function writeProof (root, pos, vals, leaf) {
   var fs = require('fs')
   fs.writeFile('input.json', json, 'utf8', (err) => { if (err != null) { console.log(err) } })
 }
-
-const values = [1, 2, 3, 4].map(x => bigInt(x))
-console.log('values of the merkle tree: ' + values)
-
-const [root, layers] = generateMerkleTree(values)
-debugMerkleTree(layers)
-
-const index = 2
-const [pos, vals, leaf] = merkleProof(layers, index)
-
-debugProof(pos, vals, leaf)
-writeProof(root, pos, vals, leaf)
+//
+// const values = [1, 2, 3, 4].map(x => bigInt(x))
+// console.log('values of the merkle tree: ' + values)
+//
+// const [root, layers] = generateMerkleTree(values)
+// debugMerkleTree(layers)
+//
+// const index = 2
+// const [pos, vals, leaf] = merkleProof(layers, index)
+//
+// debugProof(pos, vals, leaf)
+// writeProof(root, pos, vals, leaf)

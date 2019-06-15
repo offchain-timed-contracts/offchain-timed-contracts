@@ -3,22 +3,17 @@ template sloth (iter) {
   signal input x;
   signal input k;
 
-  signal c <-- in;
+  signal c[iter+1];
+  c[0] <-- in;
+
+  signal c2[iter];
+  signal c4[iter];
 
   for (var i = 0; i < iter; i++) {
-    signal c2;
-    signal c4;
-    signal c5;
-
-    c2 <== c * c;
-    c4 <== c2 * c2;
-    c5 <== c4 * c;
-
-    c <-- c5 - k;
+    c2[i] <== c[i] * c[i];
+    c4[i] <==  c2[i] * c2[i];
+    c[i+1] <==  c4[i] * c[i] - k ;
   }
 
-  x === c;
-
+  x === c[iter];
 }
-
-component main = sloth(1)
