@@ -6,7 +6,7 @@ const toStr = stringifyBigInts
 //const SLOTH_P = BN128.r
 const SLOTH_P = bigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
 const SLOTH_V = bigInt('17510594297471420177797124596205820070838691520332827474958563349260646796493')
-function sloth_encode (x, k, iter) {
+function slothEncode (x, k, iter) {
   for (let i = 0; i < iter; i++) {
     x = x.add(k, SLOTH_P)
     x = x.modPow(SLOTH_V, SLOTH_P)
@@ -15,7 +15,7 @@ function sloth_encode (x, k, iter) {
   return x
 }
 
-function sloth_decode (c, k, iter) {
+function slothDecode (c, k, iter) {
   for (let i = 0; i < iter; i++) {
     c = c.modPow(bigInt(5), SLOTH_P) // c^5
     c = c.sub(k, SLOTH_P)
@@ -41,8 +41,8 @@ function test () {
   const k = bigInt('99999')
   const iter = 2;
 
-  const c = sloth_encode(x, k, iter)
-  const d = sloth_decode(c, k, iter)
+  const c = slothEncode(x, k, iter)
+  const d = slothDecode(c, k, iter)
   console.log({x, c, k, d}, d.equals(x))
   witness(c, k, x)
 
@@ -50,3 +50,6 @@ function test () {
 }
 
 test()
+
+exports.slothEncode = slothEncode
+exports.slothDecode = slothDecode

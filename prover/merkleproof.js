@@ -62,14 +62,20 @@ function writeProof (root, pos, vals, leaf) {
   fs.writeFile('input.json', json, 'utf8', (err) => { if (err != null) { console.log(err) } })
 }
 
-const values = [1, 2, 3, 4].map(x => bigInt(x))
-console.log('values of the merkle tree: ' + values)
+function test() {
+    const values = [1, 2, 3, 4].map(x => bigInt(x))
+    console.log('values of the merkle tree: ' + values)
 
-const [root, layers] = generateMerkleTree(values)
-debugMerkleTree(layers)
+    const [root, layers] = generateMerkleTree(values)
+    debugMerkleTree(layers)
 
-const index = 2
-const [pos, vals, leaf] = merkleProof(layers, index)
+    const index = 2
+    const [pos, vals, leaf] = merkleProof(layers, index)
 
-debugProof(pos, vals, leaf)
-writeProof(root, pos, vals, leaf)
+    debugProof(pos, vals, leaf)
+    writeProof(root, pos, vals, leaf)
+}
+
+exports.generateMerkleTree = generateMerkleTree
+exports.merkleProof = merkleProof
+exports.writeProof = writeProof
