@@ -1,61 +1,40 @@
 include "../node_modules/circomlib/circuits/eddsamimc.circom";
 include "../node_modules/circomlib/circuits/mimc.circom";
+include "./sloth.circom";
+include "./num2bits.circom";
 
-template GetMerkleRoot(k){
+template GetMerkleRoot(d, t){
     // k is depth of tree
 
-    signal input leaf;
-    signal input paths2_root[k];
-    signal input paths2_root_pos[k];
+    signal input leaf[t];
+    signal input paths2_root[t][d];
+    signal input paths2_root_pos[t][d];
 
-    signal output out;
+    signal input root;
 
     // hash of first two entries in tx Merkle proof
-    component merkle_root[k];
-    merkle_root[0] = MultiMiMC7(2,91);
-    merkle_root[0].in[0] <== leaf - paths2_root_pos[0]* (leaf - paths2_root[0]);
-    merkle_root[0].in[1] <== paths2_root[0] - paths2_root_pos[0]* (paths2_root[0] - leaf);
-    merkle_root[0].k <== 0;
+    component merkle_root[t][d];
+    for (var i = 0; i < t; t++) {
+	    merkle_root[i][0] = MultiMiMC7(2,91);
+	    merkle_root[i][0].in[0] <== leaf[i] - paths2_root_pos[i][0]* (leaf[i] - paths2_root[i][0]);
+	    merkle_root[i][0].in[1] <== paths2_root[i][0] - paths2_root_pos[i][0]* (paths2_root[i][0] - leaf[i]);
+	    merkle_root[i][0].k <== 0;
 
-    // hash of all other entries in tx Merkle proof
-    for (var v = 1; v < k; v++){
-        merkle_root[v] = MultiMiMC7(2,91);
-        merkle_root[v].in[0] <== merkle_root[v-1].out - paths2_root_pos[v]* (merkle_root[v-1].out - paths2_root[v]);
-        merkle_root[v].in[1] <== paths2_root[v] - paths2_root_pos[v]* (paths2_root[v] - merkle_root[v-1].out);
-        merkle_root[v].k <== 0;
+	    // hash of all other entries in tx Merkle proof
+	    for (var v = 1; v < d; v++){
+		merkle_root[i][v] = MultiMiMC7(2,91);
+		merkle_root[i][v].in[0] <== merkle_root[i][v-1].out - paths2_root_pos[i][v]* (merkle_root[i][v-1].out - paths2_root[i][v]);
+		merkle_root[i][v].in[1] <== paths2_root[i][v] - paths2_root_pos[i][v]* (paths2_root[i][v] - merkle_root[i][v-1].out);
+		merkle_root[i][v].k <== 0;
+	    }
     }
-
     // equality constraint: input tx root === computed tx root
-    out <== merkle_root[k-1].out;
-
-}
-
-
-// checks for existence of leaf in tree of depth k
-template LeafExistence(k){
-    // k is depth of tree
-
-    signal input leaf;
-    signal input root;
-    signal input paths2_root_pos[k];
-    signal input paths2_root[k];
-
-    component computed_root = GetMerkleRoot(k);
-    computed_root.leaf <== leaf;
-
-    for (var w = 0; w < k; w++){
-        computed_root.paths2_root[w] <== paths2_root[w];
-        computed_root.paths2_root_pos[w] <== paths2_root_pos[w];
-    }
-
-    // equality constraint: input tx root === computed tx root
-    root === computed_root.out;
-
+    root === merkle_root[k-1].out; 
 }
 
 // k is the depth of tree
 // t is the number of times to check
-template Main(k, t) {
+template Main(d, t) {
    // Merkle root of por tree
    signal input por_root;
 
@@ -63,24 +42,46 @@ template Main(k, t) {
    signal input por_leaves[t];
 
    // Merkle proof for por in por tree
-   signal private input paths2por_root[2**k,k];
+   signal private input paths2por_root[t][d];
 
    // binary vector to indicate whether node is left or right
-   signal private input paths2por_root_pos[2**k,k];
+   signal private input paths2por_root_pos[t][d];
+
+   // Private inputs for Sloth VDF
+   signal private input in[t];
+
+   // Key for Sloth VDF
+   signal input k;
 
    // Use this to make sure that inputted merkle root is correct
-   component porExistence[t];
+   component porMerkleRoot = GetMerkleRoot(d,t);
 
+   
+   porMerkleRoot.root <-- por_root;
    for (var i = 0; i < t; i++) {
-      porExistence[i] = LeafExistence(k);
-      porExistence[i].leaf <== por_leaves[i];
-      porExistence[i].root <== por_root;
+      porMerkleRoot.leaf[i] <-- por_leaves[i];
 
-      for (var j = 0; j < k; j++) {
-         porExistence[i].paths2_root_pos[j] <== paths2por_root_pos[i, j];
-         porExistence[i].paths2_root[j] <== paths2por_root[i, j];
+      for (var j = 0; j < d; j++) {
+         porMerkleRoot.paths2_root_pos[i][j] <-- paths2por_root_pos[i][j];
+         porMerkleRoot.paths2_root[i][j] <-- paths2por_root[i][j];
       }
+   } 
+
+   // Verify aggregated VDF
+   component slothVerification[t];
+   component bin[t];
+   for (var i = 0; i < t-1; i++) {
+           slothVerification[i] = sloth(2);
+	   slothVerification[i].in <== in[i];
+	   slothVerification[i].x <== porMerkleRoot.leaf[i] ;
+	   slothVerification[i].k <-- k;
+
+           bin[i] = Num2Bits(255);
+           bin[i].in <-- in[i];
+
+           for (var j = 0; j < d; j++) {
+              porMerkleRoot.paths2_root_pos[i][j] === bin[i].out[j];
+           }
    }
 }
-
 component main = Main(2,2);
