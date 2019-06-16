@@ -4,7 +4,7 @@ const fs = require('fs')
 const {generateMerkleTree, merkleProof} = require('./merkleproof')
 const {sloth_encode} = require('./vdf')
 
-const SLOTH_ITER = 2
+const SLOTH_ITER = 10
 
 function post (data, t, k, seed) {
   const [root, layers] = generateMerkleTree(data)
@@ -43,6 +43,6 @@ function writeProof (proofs) {
 }
 
 const data = [...Array(4)].map((_, i) => bigInt(i))
-const proof = post(data, 2, bigInt(5), 0)
+const proof = post(data, 2, bigInt(1), 0)
 console.log(proof)
 writeProof(proof)
