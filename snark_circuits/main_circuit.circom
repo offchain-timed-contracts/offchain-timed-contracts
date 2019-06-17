@@ -1,33 +1,8 @@
-include "../node_modules/circomlib/circuits/eddsamimc.circom";
-include "../node_modules/circomlib/circuits/mimc.circom";
 include "./sloth.circom";
+include "./get_merkle_roots.circom";
 
-template GetMerkleRoot (d, t) {
-  // k is depth of tree
-
-  signal input root;
-  signal input leaf[t];
-  signal input paths2_root[t][d];
-  signal input paths2_root_pos[t][d];
-
-  component merkle_root[t][d];
-  for (var i = 0; i < t; i++) {
-    merkle_root[i][0] = MultiMiMC7(2,91);
-    merkle_root[i][0].in[0] <== leaf[i] - paths2_root_pos[i][0]* (leaf[i] - paths2_root[i][0]);
-    merkle_root[i][0].in[1] <== paths2_root[i][0] - paths2_root_pos[i][0]* (paths2_root[i][0] - leaf[i]);
-    merkle_root[i][0].k <== 0;
-
-    for (var v = 1; v < d; v++){
-      merkle_root[i][v] = MultiMiMC7(2,91);
-      merkle_root[i][v].in[0] <== merkle_root[i][v-1].out - paths2_root_pos[i][v]* (merkle_root[i][v-1].out - paths2_root[i][v]);
-      merkle_root[i][v].in[1] <== paths2_root[i][v] - paths2_root_pos[i][v]* (paths2_root[i][v] - merkle_root[i][v-1].out);
-      merkle_root[i][v].k <== 0;
-    }
-
-    root === merkle_root[i][d-1].out;
-  }
-}
-
+// d = depth of PoR merkle tree
+// t = number of times prover needed to provide a PoR
 template Main (d, t) {
   // Merkle root of por tree
   signal input por_root;
@@ -51,7 +26,7 @@ template Main (d, t) {
   signal private input in[t-1];
 
   // Use this to make sure that inputted merkle root is correct
-  component porMerkleRoot = GetMerkleRoot(d,t);
+  component porMerkleRoot = GetMerkleRoots(d,t);
   porMerkleRoot.root <-- por_root;
   for (var i = 0; i < t; i++) {
     porMerkleRoot.leaf[i] <-- por_leaves[i];
